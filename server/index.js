@@ -1,28 +1,36 @@
-import express from 'express';
-import cors from 'cors';
-import { initDatabase } from './db/database.js';
-import eventRoutes from './routes/events.js';
-import bookingRoutes from './routes/bookings.js';
+import express from "express";
+import cors from "cors";
+import { initDatabase } from "./db/database.js";
+import eventRoutes from "./routes/events.js";
+import bookingRoutes from "./routes/bookings.js";
+import dotenv from "dotenv";
+dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3001;
 
-// Middleware
-app.use(cors());
+/* ------------  CORS  ----------------- */
+const allowedOrigin = process.env.FRONTEND_URL || "*";
+app.use(
+  cors({
+    origin: allowedOrigin,
+    credentials: true,
+  })
+);
+/* ------------------------------------- */
+
 app.use(express.json());
 
-// Initialize database
 initDatabase();
 
-// Routes
-app.use('/api/events', eventRoutes);
-app.use('/api/bookings', bookingRoutes);
+app.use("/api/events", eventRoutes);
+app.use("/api/bookings", bookingRoutes);
 
-// Health check
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
-});
+app.get("/api/health", (_, res) =>
+  res.json({ status: "ok", timestamp: new Date().toISOString() })
+);
 
+/* ---- Render injects PORT, local falls back to 3001 ---- */
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-  console.log(`🚀 BookMySlot server running on port ${PORT}`);
+  console.log(`🚀 BookMySlot server running on ${PORT}`);
 });
